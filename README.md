@@ -20,7 +20,7 @@ Couleur du contour
  Légende dynamique mise à jour automatiquement
  Interface responsive avec menu latéral escamotable
 ##  Aperçu
-<img width="1022" height="594" alt="image" src="https://github.com/user-attachments/assets/610f7e39-8182-4d9d-be17-7491e0c49f6c" />
+<img width="800" height="500" alt="image" src="https://github.com/user-attachments/assets/610f7e39-8182-4d9d-be17-7491e0c49f6c" />
 
 ##  Installation
 
