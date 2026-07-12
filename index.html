@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Web Map SIG - Leaflet - Menu Escamotable</title>
+    
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+            position: relative;
+        }
+		
+		.div1 {
+        background-color: #ABBAEA;
+    }
+        
+        /* Sidebar avec transition fluide */
+        #sidebar {
+            width: 380px;
+            background: #f8f9fa;
+            border-right: 1px solid #ccc;
+            padding: 15px;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            z-index: 1010;
+            overflow-y: auto;
+            transition: transform 0.3s ease, margin-left 0.3s ease;
+        }
+        
+        /* Classe pour masquer le menu */
+        #sidebar.hidden {
+            transform: translateX(-100%);
+            margin-left: -380px;
+        }
+        
+        #map {
+            flex-grow: 1;
+            height: 100%;
+            position: relative;
+        }
+        
+        /* Bouton d'activation/d�sactivation du menu (ic�ne uniquement) */
+        #toggle-sidebar-btn {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            z-index: 1020;
+            background: white;
+            border: 1px solid #ccc;
+            width: 36px;
+            height: 36px;
+            border-radius: 4px;
+            box-shadow: 0 1px 5px rgba(0,0,0,0.4);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.2s, color 0.2s;
+            color: #555;
+            padding: 0;
+        }
+        #toggle-sidebar-btn:hover {
+            background-color: #f4f4f4;
+            color: #333;
+        }
+
+        h3 { margin-top: 45px; color: #333; border-bottom: 2px solid #007bff; padding-bottom: 5px; }
+        .control-group {
+            background: white;
+            padding: 12px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+        }
+        .control-group label { font-weight: bold; display: block; margin-bottom: 5px; font-size: 14px;}
+        input[type="file"], input[type="color"] { width: 100%; margin-top: 5px; box-sizing: border-box; }
+        select { width: 100%; padding: 5px; margin-top: 5px; border: 1px solid #ccc; border-radius: 3px;}
+        
+        /* Styles pour la liste des couches */
+        #layers-list i { color: #888; font-size: 13px; }
+        .layer-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+        }
+        .layer-item:last-child { border-bottom: none; }
+        .layer-main {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-grow: 1;
+            min-width: 0;
+        }
+        .layer-icon { color: #555; flex-shrink: 0; display: flex; align-items: center;}
+        .layer-name {
+            font-size: 13px;
+            color: #333;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .layer-controls {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            flex-shrink: 0;
+            margin-left: 10px;
+        }
+        
+        .action-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 4px;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.2s;
+            color: #555;
+        }
+        .action-btn:hover { background-color: #e9ecef; }
+        .action-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+        .action-btn:disabled:hover { background-color: transparent; }
+        .btn-delete:hover { background-color: #fee2e2; color: #dc3545; }
+        
+        .visibility-check {
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            margin-right: 5px;
+            color: #555;
+        }
+
+        /* L�gende SIG */
+        .info.legend {
+            padding: 10px;
+            font: 14px/16px Arial, Helvetica, sans-serif;
+            background: rgba(255, 255, 255, 0.95);
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+            border-radius: 5px;
+            color: #333;
+            max-width: 250px;
+        }
+        .info.legend h4 { margin: 0 0 8px; border-bottom: 1px solid #ddd; padding-bottom: 5px; }
+        #legend-content i { color: #777; font-size: 13px; }
+        .legend-item { display: flex; align-items: center; margin-bottom: 6px; }
+        .legend-icon {
+            width: 16px; height: 16px;
+            margin-right: 8px;
+            border: 2px solid #fff;
+            box-shadow: 0 0 2px rgba(0,0,0,0.4);
+            border-radius: 2px;
+            flex-shrink: 0;
+        }
+        .legend-text {
+            font-size: 13px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .custom-file-btn {
+    display: inline-block;
+    padding: 6px 12px;
+    background-color: #007bff;
+    color: white;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+}
+.custom-file-btn:hover {
+    background-color: #0056b3;
+}
+    </style>
+</head>
+<body>
+ 
+    <button id="toggle-sidebar-btn" onclick="toggleSidebar()" title="Afficher/Masquer le menu">
+        <span id="toggle-btn-content"></span>
+    </button>
+    
+    <div id="sidebar">
+
+        <div class="div1">  
+				<h3>
+				  <img src="./logo.jpg" alt="Logo Officiel Sig" width="120" height="40">
+        Web Map</h3>
+        </div>
+        <div class="control-group">
+            <label>1. Importer des données</label>
+            <span style="font-size: 11px; color: #666; display: block; margin-bottom: 8px;">GeoJSON (.geojson) ou Shapefile (dossier ZIP)</span>
+            <label for="file-input" class="custom-file-btn">Selectionner un fichier</label>
+            <input type="file" id="file-input" accept=".geojson,.json,.zip" style="display: none;">
+        </div>
+
+        <div class="control-group">
+            <label>2. Style de la couche active</label>
+            <select id="layer-selector">
+                <option value="">-- Aucune couche --</option>
+            </select>
+            
+            <div style="margin-top: 10px; display: flex; gap: 10px;">
+                <div style="flex: 1;">
+                    <label style="font-weight: normal; font-size: 12px;">Remplissage</label>
+                    <input type="color" id="fill-color" value="#3388ff">
+                </div>
+                <div style="flex: 1;">
+                    <label style="font-weight: normal; font-size: 12px;">Contour</label>
+                    <input type="color" id="stroke-color" value="#3388ff">
+                </div>
+            </div>
+        </div>
+
+        <div class="control-group">
+            <label>3. Gestion des couches</label>
+            <div id="layers-list"><i>Aucune couche importée</i></div>
+        </div>
+    </div>
+
+    <div id="map"></div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/shpjs/4.0.4/shp.js"></script>
+
+    <script>
+        // D�finition des ic�nes SVG
+        const ICONS = {
+            folder: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>`,
+            up: `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"></polyline></svg>`,
+            down: `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>`,
+            trash: `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>`,
+            visible: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>`,
+            hidden: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>`,
+            // Ic�nes pour le menu
+            menuOpen: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>`,
+            menuClose: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>`
+        };
+
+        // --- Fonction de gestion du bouton menu ---
+        function updateToggleButton(isMenuHidden) {
+            const container = document.getElementById('toggle-btn-content');
+            // Si cach�, on montre l'ic�ne "hamburger" pour ouvrir, sinon la fl�che "retour" pour fermer
+            container.innerHTML = isMenuHidden ? ICONS.menuOpen : ICONS.menuClose;
+        }
+
+        window.toggleSidebar = function() {
+            const sidebar = document.getElementById('sidebar');
+            sidebar.classList.toggle('hidden');
+            
+            const isHidden = sidebar.classList.contains('hidden');
+            updateToggleButton(isHidden);
+            
+            setTimeout(() => { map.invalidateSize(); }, 300);
+        };
+
+        // --- Initialisation de la carte ---
+        const map = L.map('map').setView([46.5, 2.5], 6);
+
+        const osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '� OpenStreetMap'
+        }).addTo(map);
+
+        const satellite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+            attribution: 'Tiles � Esri'
+        });
+
+        L.control.layers({"Plan": osm, "Satellite": satellite}, null, {collapsed: false}).addTo(map);
+
+        let importedLayers = []; 
+        let layerCount = 0;
+
+        // Configuration initiale de l'ic�ne du menu (Menu ouvert par d�faut)
+        updateToggleButton(false);
+
+        // --- L�gende ---
+        const legend = L.control({ position: 'bottomright' });
+        legend.onAdd = function () {
+            const div = L.DomUtil.create('div', 'info legend');
+            div.innerHTML = '<h4>L�gende</h4><div id="legend-content"><i>Aucune donn�e</i></div>';
+            L.DomEvent.disableClickPropagation(div);
+            return div;
+        };
+        legend.addTo(map);
+
+        function updateMapAndLegend() {
+            importedLayers.forEach(l => {
+                if (l.visible && map.hasLayer(l.layer)) { l.layer.bringToFront(); }
+            });
+
+            const content = document.getElementById('legend-content');
+            let html = '';
+            let hasVisible = false;
+
+            for (let i = importedLayers.length - 1; i >= 0; i--) {
+                const l = importedLayers[i];
+                if (l.visible) {
+                    hasVisible = true;
+                    html += `
+                        <div class="legend-item">
+                            <span class="legend-icon" style="background-color: ${l.style.fillColor}; border-color: ${l.style.color};"></span>
+                            <span class="legend-text" title="${l.name}">${l.name}</span>
+                        </div>
+                    `;
+                }
+            }
+            content.innerHTML = hasVisible ? html : '<i>Aucune donn�e active</i>';
+        }
+
+        // --- Gestion de l'import ---
+        document.getElementById('file-input').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            const fileName = file.name;
+
+            if (fileName.endsWith('.zip')) {
+                reader.onload = e => shp(e.target.result).then(geojson => addLayer(geojson, fileName)).catch(err => alert("Erreur Shapefile: " + err));
+                reader.readAsArrayBuffer(file);
+            } else if (fileName.endsWith('.geojson') || fileName.endsWith('.json')) {
+                reader.onload = e => {
+                    try { addLayer(JSON.parse(e.target.result), fileName); }
+                    catch (err) { alert("Erreur GeoJSON: " + err); }
+                };
+                reader.readAsText(file);
+            }
+            e.target.value = '';
+        });
+
+        function addLayer(geojson, name) {
+            layerCount++;
+            const id = 'layer_' + layerCount;
+            const style = { color: "#3388ff", weight: 2, opacity: 1, fillColor: "#3388ff", fillOpacity: 0.4 };
+
+            const layer = L.geoJSON(geojson, {
+                style: style,
+                onEachFeature: (f, l) => {
+                    if (f.properties) {
+                        let out = "<div style='max-height:150px; overflow-y:auto;'><strong>Attributs :</strong><table style='font-size:11px; width:100%; border-collapse:collapse; margin-top:5px;' border='1'>";
+                        for (let key in f.properties) { out += `<tr><td><strong>${key}</strong></td><td>${f.properties[key]}</td></tr>`; }
+                        out += "</table></div>";
+                        l.bindPopup(out);
+                    }
+                }
+            }).addTo(map);
+
+            if (importedLayers.length === 0) { map.fitBounds(layer.getBounds()); }
+            importedLayers.push({ id, layer, name, style, visible: true });
+            
+            updateUI();
+            updateMapAndLegend();
+        }
+
+        // --- Mise � jour de la Sidebar ---
+        function updateUI() {
+            const selector = document.getElementById('layer-selector');
+            const list = document.getElementById('layers-list');
+            const currentSelected = selector.value;
+            
+            selector.innerHTML = '<option value="">-- Sélectionner une couche --</option>';
+            list.innerHTML = '';
+
+            if (importedLayers.length === 0) {
+                list.innerHTML = '<i>Aucune couche import�e</i>';
+                return;
+            }
+
+            for (let i = importedLayers.length - 1; i >= 0; i--) {
+                const l = importedLayers[i];
+                
+                const opt = document.createElement('option');
+                opt.value = l.id;
+                opt.textContent = l.name;
+                if (l.id === currentSelected) opt.selected = true;
+                selector.appendChild(opt);
+
+                const item = document.createElement('div');
+                item.className = 'layer-item';
+                
+                const eyeIcon = l.visible ? ICONS.visible : ICONS.hidden;
+                const upDisabled = (i === importedLayers.length - 1) ? 'disabled' : '';
+                const downDisabled = (i === 0) ? 'disabled' : '';
+
+                item.innerHTML = `
+                    <div class="layer-main">
+                        <span class="layer-icon">${ICONS.folder}</span>
+                        <span class="layer-name" title="${l.name}">${l.name}</span>
+                    </div>
+                    <div class="layer-controls">
+                        <button class="action-btn" ${upDisabled} onclick="moveLayer(${i}, 1)" title="Monter">${ICONS.up}</button>
+                        <button class="action-btn" ${downDisabled} onclick="moveLayer(${i}, -1)" title="Descendre">${ICONS.down}</button>
+                        <span class="visibility-check" onclick="toggleVisibility('${l.id}')" title="${l.visible?'Masquer':'Afficher'}">${eyeIcon}</span>
+                        <button class="action-btn btn-delete" onclick="removeLayer('${l.id}')" title="Supprimer">${ICONS.trash}</button>
+                    </div>
+                `;
+                list.appendChild(item);
+            }
+        }
+
+        window.moveLayer = (index, delta) => {
+            const target = index + delta;
+            if (target < 0 || target >= importedLayers.length) return;
+            [importedLayers[index], importedLayers[target]] = [importedLayers[target], importedLayers[index]];
+            updateUI();
+            updateMapAndLegend();
+        };
+
+        window.toggleVisibility = (id) => {
+            const l = importedLayers.find(layer => layer.id === id);
+            if (!l) return;
+            l.visible = !l.visible;
+            if (l.visible) { l.layer.addTo(map); } else { map.removeLayer(l.layer); }
+            updateUI();
+            updateMapAndLegend();
+        };
+
+        window.removeLayer = (id) => {
+            const idx = importedLayers.findIndex(l => l.id === id);
+            if (idx === -1) return;
+            map.removeLayer(importedLayers[idx].layer);
+            importedLayers.splice(idx, 1);
+            updateUI();
+            updateMapAndLegend();
+        };
+
+        // --- Gestion du Style ---
+        const fCol = document.getElementById('fill-color');
+        const sCol = document.getElementById('stroke-color');
+        const sel = document.getElementById('layer-selector');
+
+        function updateStyle() {
+            const l = importedLayers.find(layer => layer.id === sel.value);
+            if (!l) return;
+            l.style.fillColor = fCol.value;
+            l.style.color = sCol.value;
+            l.layer.setStyle({ fillColor: fCol.value, color: sCol.value });
+            updateMapAndLegend();
+        }
+
+        fCol.addEventListener('input', updateStyle);
+        sCol.addEventListener('input', updateStyle);
+        sel.addEventListener('change', function() {
+            const l = importedLayers.find(layer => layer.id === this.value);
+            if (l) {
+                fCol.value = l.style.fillColor;
+                sCol.value = l.style.color;
+            }
+        });
+		
+		
+    </script>
+</body>
+</html>
