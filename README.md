@@ -20,29 +20,10 @@ Couleur du contour
  Légende dynamique mise à jour automatiquement
  Interface responsive avec menu latéral escamotable
 ##  Aperçu
-Ajoutez ici une capture d'écran de l'application.
-docs/screenshot.png
-##  Installation
-Clonez le dépôt :
-gitclonehttps://github.com/votre-utilisateur/votre-repository.git
-Accédez au dossier :
-## •
-## •
-## •
-## •
-## •
-## •
-## •
-## •
-## •
-## •
-## •
-## •
-## •
-## •
-## 1
+<img width="1022" height="594" alt="image" src="https://github.com/user-attachments/assets/610f7e39-8182-4d9d-be17-7491e0c49f6c" />
 
-cdvotre-repository
+##  Installation
+
 Ouvrez simplement le fichier index.html dans votre navigateur.
 Aucun serveur ni compilation ne sont nécessaires.
  Structure du projet
@@ -66,17 +47,6 @@ Sélectionnez une couche dans la liste puis choisissez :
 couleur du remplissage
 couleur du contour
 Les modifications sont appliquées instantanément.
-## •
-## •
-## •
-## •
-## •
-## •
-## •
-## •
-## •
-## 2
-
 - Gérer les couches
 Pour chaque couche, il est possible de :
 afficher/masquer
@@ -99,35 +69,6 @@ GeoJSON
 JavaScript (Vanilla)
 ## Leaflet
 ## Shp.js
- Évolutions possibles
-Recherche d'entités
-Mesure de distances et surfaces
-Dessin d'objets
-Export GeoJSON
-Impression PDF
-Gestion des projections
-Support WMS/WFS
-Contrôle de transparence des couches
-Géolocalisation de l'utilisateur
-## •
-## •
-## •
-## •
-## •
-## •
-## •
-## •
-## •
-## •
-## •
-## •
-## •
-## •
-## •
-## •
-## •
-## •
-## 3
 
 ##  Licence
 Ce projet est distribué sous licence MIT.
@@ -135,5 +76,4 @@ Vous êtes libre de l'utiliser, de le modifier et de le redistribuer.
 ##  Auteur
 Développé par Votre Boudrouss Abdelali.
 Email: abdogi458@gmail.com
-N'hésitez pas à contribuer au projet en ouvrant une Issue ou une Pull Request.
-## 4
+
